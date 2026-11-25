@@ -11,6 +11,7 @@ let package = Package(
             name: "RemoteComposeUI",
             targets: ["RemoteComposeUI"]
         ),
+        .executable(name: "rcdump", targets: ["rcdump"])
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -21,6 +22,7 @@ let package = Package(
                 .enableUpcomingFeature("ApproachableConcurrency"),
             ],
         ),
+        .executableTarget(name: "rcdump", dependencies: ["RemoteComposeUI"]),
         .testTarget(
             name: "RemoteComposeUITests",
             dependencies: ["RemoteComposeUI"],

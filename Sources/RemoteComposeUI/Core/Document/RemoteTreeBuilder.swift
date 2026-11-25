@@ -1,0 +1,59 @@
+import Foundation
+
+enum RemoteTreeBuilder {
+    static func build(from operations: [RemoteOperation]) -> RemoteNode? {
+        var stack: [RemoteNode] = []
+        var topLevel: [RemoteNode] = []
+
+        func close(_ node: RemoteNode) {
+            if stack.isEmpty {
+                topLevel.append(node)
+            } else {
+                stack[stack.count - 1].children.append(node)
+            }
+        }
+
+        for (index, op) in operations.enumerated() {
+            switch op {
+            case let .rootLayout(o): stack.append(RemoteNode(id: index, kind: .root(o)))
+            case let .layoutContent(o): stack.append(RemoteNode(id: index, kind: .content(o)))
+            case let .rowLayout(o): stack.append(RemoteNode(id: index, kind: .row(o)))
+            case let .columnLayout(o): stack.append(RemoteNode(id: index, kind: .column(o)))
+            case let .textLayout(o): stack.append(RemoteNode(id: index, kind: .text(o)))
+            case .containerEnd:
+                if let finished = stack.popLast() { close(finished) }
+            case let .backgroundModifier(m):
+                if !stack.isEmpty { stack[stack.count - 1].modifiers.append(.background(m)) }
+            case .header, .textData:
+                break
+            }
+        }
+
+        while let unfinished = stack.popLast() { close(unfinished) }
+
+        guard !topLevel.isEmpty else { return nil }
+
+        let root: RemoteNode
+        if topLevel.count == 1, case .root = topLevel[0].kind {
+            root = topLevel[0]
+        } else {
+            root = RemoteNode(id: -1, kind: .root(RootLayoutOperation(componentId: -1)),
+                              children: topLevel)
+        }
+        return flattenContent(root)
+    }
+
+    private static func flattenContent(_ node: RemoteNode) -> RemoteNode {
+        var result = node
+        result.children = []
+        for child in node.children {
+            let flattened = flattenContent(child)
+            if case .content = flattened.kind {
+                result.children.append(contentsOf: flattened.children)
+            } else {
+                result.children.append(flattened)
+            }
+        }
+        return result
+    }
+}
