@@ -4,7 +4,7 @@ enum RemoteTreeBuilder {
     static func build(from operations: [RemoteOperation]) -> RemoteNode? {
         var stack: [RemoteNode] = []
         var topLevel: [RemoteNode] = []
-
+        
         func close(_ node: RemoteNode) {
             if stack.isEmpty {
                 topLevel.append(node)
@@ -12,37 +12,43 @@ enum RemoteTreeBuilder {
                 stack[stack.count - 1].children.append(node)
             }
         }
-
+        
         for (index, op) in operations.enumerated() {
             switch op {
-            case let .rootLayout(o): stack.append(RemoteNode(id: index, kind: .root(o)))
-            case let .layoutContent(o): stack.append(RemoteNode(id: index, kind: .content(o)))
-            case let .rowLayout(o): stack.append(RemoteNode(id: index, kind: .row(o)))
-            case let .columnLayout(o): stack.append(RemoteNode(id: index, kind: .column(o)))
-            case let .textLayout(o): stack.append(RemoteNode(id: index, kind: .text(o)))
+            case .rootLayout(let o): stack.append(RemoteNode(id: index, kind: .root(o)))
+            case .layoutContent(let o): stack.append(RemoteNode(id: index, kind: .content(o)))
+            case .rowLayout(let o): stack.append(RemoteNode(id: index, kind: .row(o)))
+            case .columnLayout(let o): stack.append(RemoteNode(id: index, kind: .column(o)))
+            case .canvasLayout(let o): stack.append(RemoteNode(id: index, kind: .canvas(o)))
+            case .textLayout(let o): stack.append(RemoteNode(id: index, kind: .text(o)))
             case .containerEnd:
                 if let finished = stack.popLast() { close(finished) }
-            case let .backgroundModifier(m):
+            case .backgroundModifier(let m):
                 if !stack.isEmpty { stack[stack.count - 1].modifiers.append(.background(m)) }
-            case .header, .textData:
+            case .widthModifier(let m):
+                if !stack.isEmpty { stack[stack.count - 1].modifiers.append(.width(m)) }
+            case .heightModifier(let m):
+                if !stack.isEmpty { stack[stack.count - 1].modifiers.append(.height(m)) }
+            case .header, .textData, .dataListIds:
                 break
             }
         }
-
+        
         while let unfinished = stack.popLast() { close(unfinished) }
-
+        
         guard !topLevel.isEmpty else { return nil }
-
+        
         let root: RemoteNode
         if topLevel.count == 1, case .root = topLevel[0].kind {
             root = topLevel[0]
         } else {
-            root = RemoteNode(id: -1, kind: .root(RootLayoutOperation(componentId: -1)),
-                              children: topLevel)
+            root = RemoteNode(
+                id: -1, kind: .root(RootLayoutOperation(componentId: -1)),
+                children: topLevel)
         }
         return flattenContent(root)
     }
-
+    
     private static func flattenContent(_ node: RemoteNode) -> RemoteNode {
         var result = node
         result.children = []

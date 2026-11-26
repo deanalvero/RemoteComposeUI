@@ -5,7 +5,7 @@ extension RenderContext {
     func font(for text: TextLayoutOperation) -> Font {
         let size = max(CGFloat(float(text.fontSize, default: 16)), 1)
         let weight = Self.fontWeight(float(text.fontWeight, default: 400))
-
+        
         var design = Font.Design.default
         if text.fontFamilyId != -1, let family = string(for: text.fontFamilyId) {
             switch family.lowercased() {
@@ -14,12 +14,12 @@ extension RenderContext {
             default: design = .default
             }
         }
-
+        
         var font = Font.system(size: size, weight: weight, design: design)
         if text.fontStyle == 1 { font = font.italic() }
         return font
     }
-
+    
     static func fontWeight(_ value: Float) -> Font.Weight {
         switch value {
         case ..<150: return .ultraLight

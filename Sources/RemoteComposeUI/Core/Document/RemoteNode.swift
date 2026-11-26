@@ -2,6 +2,8 @@ import Foundation
 
 public enum RemoteModifier: Equatable {
     case background(BackgroundModifierOperation)
+    case width(WidthModifierOperation)
+    case height(HeightModifierOperation)
 }
 
 public struct RemoteNode: Identifiable, Equatable {
@@ -10,14 +12,15 @@ public struct RemoteNode: Identifiable, Equatable {
         case content(LayoutContentOperation)
         case row(RowLayoutOperation)
         case column(ColumnLayoutOperation)
+        case canvas(CanvasLayoutOperation)
         case text(TextLayoutOperation)
     }
-
+    
     public let id: Int
     public var kind: Kind
     public var modifiers: [RemoteModifier]
     public var children: [RemoteNode]
-
+    
     public init(id: Int, kind: Kind, modifiers: [RemoteModifier] = [], children: [RemoteNode] = []) {
         self.id = id
         self.kind = kind

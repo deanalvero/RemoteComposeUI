@@ -7,7 +7,7 @@ public struct HeaderOperation: Equatable {
     public var width: Int
     public var height: Int
     public var capabilities: Int64
-
+    
     public init(
         majorVersion: Int = 1,
         minorVersion: Int = 1,
@@ -44,7 +44,7 @@ extension HeaderOperation {
             )
         )
     }
-
+    
     public func write(to w: inout WireWriter) {
         w.start(OpCode.header)
         w.writeInt(majorVersion)

@@ -4,11 +4,11 @@ import SwiftUI
 struct RemoteNodeView: View {
     let node: RemoteNode
     let context: RenderContext
-
+    
     var body: some View {
         decorated(AnyView(content))
     }
-
+    
     @ViewBuilder
     private var content: some View {
         switch node.kind {
@@ -17,20 +17,25 @@ struct RemoteNodeView: View {
                 ChildrenView(children: node.children, context: context)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        case let .row(row):
+        case .row(let row):
             RowNodeView(row: row, children: node.children, context: context)
-        case let .column(column):
+        case .column(let column):
             ColumnNodeView(column: column, children: node.children, context: context)
-        case let .text(text):
+        case .canvas:
+            ZStack(alignment: .topLeading) {
+                ChildrenView(children: node.children, context: context)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        case .text(let text):
             TextNodeView(text: text, context: context)
         }
     }
-
+    
     private func decorated(_ view: AnyView) -> AnyView {
         var result = view
         for modifier in node.modifiers.reversed() {
             switch modifier {
-            case let .background(background):
+            case .background(let background):
                 result = AnyView(
                     result.background(
                         BackgroundShapeView(
@@ -39,6 +44,10 @@ struct RemoteNodeView: View {
                         )
                     )
                 )
+            case .width(let width):
+                result = result.applying(width: width, context: context)
+            case .height(let height):
+                result = result.applying(height: height, context: context)
             }
         }
         return result
@@ -48,7 +57,7 @@ struct RemoteNodeView: View {
 struct ChildrenView: View {
     let children: [RemoteNode]
     let context: RenderContext
-
+    
     var body: some View {
         ForEach(children) { child in
             RemoteNodeView(node: child, context: context)

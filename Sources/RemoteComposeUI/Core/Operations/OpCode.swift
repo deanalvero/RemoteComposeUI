@@ -6,11 +6,15 @@ public enum OpCode {
     public static let layoutRow = 203
     public static let layoutColumn = 204
     public static let layoutText = 208
+    public static let layoutCanvas = 205
+    public static let dataListIds = 146
+    public static let modifierWidth = 16
+    public static let modifierHeight = 67
     public static let modifierBackground = 55
     public static let containerEnd = 214
-
+    
     public static func name(of opCode: Int) -> String? { allNames[opCode] }
-
+    
     static let allNames: [Int: String] = [
         0: "HEADER",
         2: "COMPONENT_START",

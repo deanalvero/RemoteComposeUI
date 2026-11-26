@@ -5,54 +5,64 @@ public struct RemoteDocument {
     public let operations: [RemoteOperation]
     public let header: HeaderOperation?
     public let texts: [Int: String]
+    public let idLists: [Int: [Int]]
     public let root: RemoteNode?
     public let diagnostics: [RemoteComposeError]
-
-    public var variables: RemoteVariables { RemoteVariables(texts: texts) }
-
+    
+    public var variables: RemoteVariables { RemoteVariables(texts: texts, idLists: idLists) }
+    
     public init(operations: [RemoteOperation], diagnostics: [RemoteComposeError] = []) {
         self.operations = operations
         self.diagnostics = diagnostics
-
+        
         var header: HeaderOperation?
         var texts: [Int: String] = [:]
+        var idLists: [Int: [Int]] = [:]
         for op in operations {
             switch op {
-            case let .header(h):
+            case .header(let h):
                 if header == nil { header = h }
-            case let .textData(t):
+            case .textData(let t):
                 texts[t.textId] = t.text
+            case .dataListIds(let list):
+                idLists[list.id] = list.ids
             default:
                 break
             }
         }
         self.header = header
         self.texts = texts
+        self.idLists = idLists
         self.root = RemoteTreeBuilder.build(from: operations)
     }
-
+    
     // MARK: Parsing
     
-    public static func parse(_ data: Data,
-                             registry: OperationRegistry = .standard) throws -> RemoteDocument {
+    public static func parse(
+        _ data: Data,
+        registry: OperationRegistry = .standard
+    ) throws -> RemoteDocument {
         let result = decode(data, registry: registry)
         if let error = result.error { throw error }
         return RemoteDocument(operations: result.operations)
     }
-
-    public static func parseLenient(_ data: Data,
-                                    registry: OperationRegistry = .standard) -> RemoteDocument {
+    
+    public static func parseLenient(
+        _ data: Data,
+        registry: OperationRegistry = .standard
+    ) -> RemoteDocument {
         let result = decode(data, registry: registry)
         return RemoteDocument(
             operations: result.operations,
             diagnostics: result.error.map { [$0] } ?? []
         )
     }
-
+    
     private static let compressedMarker = 0x78
-
+    
     private static func decode(_ data: Data, registry: OperationRegistry)
-        -> (operations: [RemoteOperation], error: RemoteComposeError?) {
+    -> (operations: [RemoteOperation], error: RemoteComposeError?)
+    {
         var reader = WireReader(data)
         var operations: [RemoteOperation] = []
         while !reader.isAtEnd {
@@ -67,16 +77,17 @@ public struct RemoteDocument {
                 }
                 operations.append(try read(&reader))
             } catch {
-                let wireError = (error as? RemoteComposeError)
-                    ?? .truncated(offset: reader.offset, needed: 0)
+                let wireError =
+                (error as? RemoteComposeError)
+                ?? .truncated(offset: reader.offset, needed: 0)
                 return (operations, wireError)
             }
         }
         return (operations, nil)
     }
-
+    
     // MARK: Debug output
-
+    
     public func dumpOperations() -> String {
         var lines: [String] = []
         for (index, op) in operations.enumerated() {
@@ -87,7 +98,7 @@ public struct RemoteDocument {
         }
         return lines.joined(separator: "\n")
     }
-
+    
     public func dumpTree() -> String {
         guard let root = root else { return "(empty)" }
         var lines: [String] = []

@@ -19,7 +19,7 @@ enum SampleDocuments {
         }
         return try! RemoteDocument.parse(b.build())
     }
-
+    
     static func rowArrangements() -> RemoteDocument {
         let chip = BackgroundModifierOperation(red: 0.2, green: 0.5, blue: 0.9)
         let dot = BackgroundModifierOperation(red: 0.9, green: 0.3, blue: 0.3, shapeType: ShapeType.circle)
@@ -46,7 +46,7 @@ enum SampleDocuments {
         }
         return try! RemoteDocument.parse(b.build())
     }
-
+    
     static func columnAlignment() -> RemoteDocument {
         let b = DocumentBuilder(width: 360, height: 640)
         b.root {

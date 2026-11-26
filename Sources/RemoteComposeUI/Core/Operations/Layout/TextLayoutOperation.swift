@@ -19,7 +19,7 @@ public enum TextOverflow {
 
 public struct TextLayoutOperation: Equatable {
     public static let flagIsDynamicColor = 1
-
+    
     public var componentId: Int
     public var animationId: Int
     public var textId: Int
@@ -31,7 +31,7 @@ public struct TextLayoutOperation: Equatable {
     public var textAlign: Int
     public var overflow: Int
     public var maxLines: Int
-
+    
     public init(
         componentId: Int,
         animationId: Int = -1,
@@ -57,7 +57,7 @@ public struct TextLayoutOperation: Equatable {
         self.overflow = overflow
         self.maxLines = maxLines
     }
-
+    
     public var alignment: Int { textAlign & 0xFFFF }
     public var flags: Int { (textAlign >> 16) & 0xFFFF }
     public var usesDynamicColor: Bool { (flags & TextLayoutOperation.flagIsDynamicColor) != 0 }
@@ -92,7 +92,7 @@ extension TextLayoutOperation {
             )
         )
     }
-
+    
     public func write(to w: inout WireWriter) {
         w.start(OpCode.layoutText)
         w.writeInt(componentId)

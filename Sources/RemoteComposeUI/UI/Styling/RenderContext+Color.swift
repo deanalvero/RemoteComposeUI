@@ -13,7 +13,7 @@ extension RenderContext {
         let a = Double(float(background.a, default: 1))
         return Color(.sRGB, red: r, green: g, blue: b, opacity: a)
     }
-
+    
     func color(for text: TextLayoutOperation) -> Color {
         if text.usesDynamicColor {
             if let argb = variables.colors[text.color] { return Color(argb: argb) }

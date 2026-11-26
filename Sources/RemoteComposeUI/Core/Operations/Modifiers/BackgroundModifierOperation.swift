@@ -7,7 +7,7 @@ public enum ShapeType {
 
 public struct BackgroundModifierOperation: Equatable {
     public static let colorRef = 2
-
+    
     public var flags: Int
     public var colorId: Int
     public var reserve1: Int
@@ -17,7 +17,7 @@ public struct BackgroundModifierOperation: Equatable {
     public var b: RemoteFloat
     public var a: RemoteFloat
     public var shapeType: Int
-
+    
     public init(
         flags: Int = 0,
         colorId: Int = 0,
@@ -39,7 +39,7 @@ public struct BackgroundModifierOperation: Equatable {
         self.a = a
         self.shapeType = shapeType
     }
-
+    
     public init(red: Float, green: Float, blue: Float, alpha: Float = 1, shapeType: Int = ShapeType.rectangle) {
         self.init(
             r: RemoteFloat(red),
@@ -49,7 +49,7 @@ public struct BackgroundModifierOperation: Equatable {
             shapeType: shapeType
         )
     }
-
+    
     public init(colorId: Int, shapeType: Int = ShapeType.rectangle) {
         let zero = RemoteFloat(0)
         self.init(
@@ -62,7 +62,7 @@ public struct BackgroundModifierOperation: Equatable {
             shapeType: shapeType
         )
     }
-
+    
     public var usesColorId: Bool { flags == BackgroundModifierOperation.colorRef }
 }
 
@@ -91,7 +91,7 @@ extension BackgroundModifierOperation {
             )
         )
     }
-
+    
     public func write(to w: inout WireWriter) {
         w.start(OpCode.modifierBackground)
         w.writeInt(flags)

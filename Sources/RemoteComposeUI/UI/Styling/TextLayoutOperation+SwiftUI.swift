@@ -9,11 +9,11 @@ extension TextLayoutOperation {
         default: return .leading
         }
     }
-
+    
     var swiftUILineLimit: Int? {
         (maxLines > 0 && maxLines < Int(Int32.max)) ? maxLines : nil
     }
-
+    
     var swiftUITruncation: Text.TruncationMode {
         switch overflow {
         case TextOverflow.startEllipsis: return .head

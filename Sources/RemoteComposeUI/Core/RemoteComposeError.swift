@@ -6,7 +6,7 @@ public enum RemoteComposeError: Error, Equatable, CustomStringConvertible {
     case unsupportedOperation(opCode: Int, offset: Int)
     case invalidLength(offset: Int, length: Int)
     case compressedDocumentUnsupported
-
+    
     public var description: String {
         switch self {
         case let .truncated(offset, needed):

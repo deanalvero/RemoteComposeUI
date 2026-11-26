@@ -4,7 +4,7 @@ import SwiftUI
 struct BackgroundShapeView: View {
     let background: BackgroundModifierOperation
     let context: RenderContext
-
+    
     var body: some View {
         if let color = context.color(for: background) {
             switch background.shapeType {

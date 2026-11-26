@@ -6,7 +6,7 @@ public struct ColumnLayoutOperation: Equatable {
     public var horizontalPositioning: Int
     public var verticalPositioning: Int
     public var spacedBy: Float
-
+    
     public init(
         componentId: Int,
         animationId: Int = -1,

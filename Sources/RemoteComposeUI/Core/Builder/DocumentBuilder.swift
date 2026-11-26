@@ -3,26 +3,27 @@ import Foundation
 public final class DocumentBuilder {
     private var out = WireWriter()
     private var texts: [(id: Int, text: String)] = []
+    private var idLists: [DataListIdsOperation] = []
     private var nextTextId = 1
     private var nextComponentId = 1
     private let width: Int
     private let height: Int
     private let wrapChildrenInContent: Bool
-
+    
     public init(width: Int = 400, height: Int = 800, wrapChildrenInContent: Bool = true) {
         self.width = width
         self.height = height
         self.wrapChildrenInContent = wrapChildrenInContent
     }
-
+    
     // MARK: Containers
-
+    
     public func root(_ children: () -> Void) {
         RootLayoutOperation(componentId: newComponentId()).write(to: &out)
         wrapped(children)
         out.start(OpCode.containerEnd)
     }
-
+    
     public func row(
         horizontal: Int = Positioning.start,
         vertical: Int = Positioning.top,
@@ -41,7 +42,7 @@ public final class DocumentBuilder {
         wrapped(children)
         out.start(OpCode.containerEnd)
     }
-
+    
     public func column(
         horizontal: Int = Positioning.start,
         vertical: Int = Positioning.top,
@@ -60,9 +61,19 @@ public final class DocumentBuilder {
         wrapped(children)
         out.start(OpCode.containerEnd)
     }
-
+    
+    public func canvas(
+        modifiers: [RemoteModifier] = [],
+        _ children: () -> Void = {}
+    ) {
+        CanvasLayoutOperation(componentId: newComponentId()).write(to: &out)
+        write(modifiers)
+        wrapped(children)
+        out.start(OpCode.containerEnd)
+    }
+    
     // MARK: Leaves
-
+    
     public func text(
         _ string: String,
         color: UInt32 = 0xFF00_0000,
@@ -96,41 +107,52 @@ public final class DocumentBuilder {
         write(modifiers)
         out.start(OpCode.containerEnd)
     }
-
+    
+    // MARK: Data
+    
+    public func dataListIds(id: Int, values: [Int]) {
+        idLists.append(DataListIdsOperation(id: id, ids: values))
+    }
+    
     // MARK: Output
-
+    
     public func build() -> Data {
         var w = WireWriter()
         HeaderOperation(width: width, height: height).write(to: &w)
         for entry in texts {
             TextDataOperation(textId: entry.id, text: entry.text).write(to: &w)
         }
+        for list in idLists {
+            list.write(to: &w)
+        }
         let header = w.bytes
         return Data(header + out.bytes)
     }
-
+    
     // MARK: Helpers
-
+    
     private func newComponentId() -> Int {
         defer { nextComponentId += 1 }
         return nextComponentId
     }
-
+    
     private func registerText(_ string: String) -> Int {
         let id = nextTextId
         nextTextId += 1
         texts.append((id: id, text: string))
         return id
     }
-
+    
     private func write(_ modifiers: [RemoteModifier]) {
         for modifier in modifiers {
             switch modifier {
-            case let .background(op): op.write(to: &out)
+            case .background(let op): op.write(to: &out)
+            case .width(let op): op.write(to: &out)
+            case .height(let op): op.write(to: &out)
             }
         }
     }
-
+    
     private func wrapped(_ children: () -> Void) {
         if wrapChildrenInContent {
             LayoutContentOperation(componentId: newComponentId()).write(to: &out)
