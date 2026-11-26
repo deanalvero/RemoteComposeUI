@@ -22,10 +22,11 @@ struct RemoteNodeView: View {
         case .column(let column):
             ColumnNodeView(column: column, children: node.children, context: context)
         case .canvas:
-            ZStack(alignment: .topLeading) {
-                ChildrenView(children: node.children, context: context)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            CanvasLayoutNodeView(
+                children: node.children,
+                commands: node.canvasCommands,
+                context: context
+            )
         case .text(let text):
             TextNodeView(text: text, context: context)
         }

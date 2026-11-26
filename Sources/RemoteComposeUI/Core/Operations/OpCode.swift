@@ -8,6 +8,13 @@ public enum OpCode {
     public static let layoutText = 208
     public static let layoutCanvas = 205
     public static let dataListIds = 146
+    public static let floatExpression = 81
+    public static let componentValue = 150
+    public static let textLookup = 151
+    public static let textFromFloat = 135
+    public static let textMerge = 136
+    public static let paintData = 40
+    public static let drawTextAnchored = 133
     public static let modifierWidth = 16
     public static let modifierHeight = 67
     public static let modifierBackground = 55
@@ -83,7 +90,7 @@ public enum OpCode {
         130: "MATRIX_SAVE",
         131: "MATRIX_RESTORE",
         132: "MATRIX_SET",
-        133: "DRAW_TEXT_ANCHOR",
+        133: "DRAW_TEXT_ANCHORED",
         134: "COLOR_EXPRESSIONS",
         135: "TEXT_FROM_FLOAT",
         136: "TEXT_MERGE",

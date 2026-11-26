@@ -16,6 +16,7 @@ public struct WireReader {
     
     public var isAtEnd: Bool { offset >= bytes.count }
     public var count: Int { bytes.count }
+    public var remainingByteCount: Int { max(0, bytes.count - offset) }
     
     private mutating func take(_ n: Int) throws -> Int {
         guard n >= 0, offset <= bytes.count, bytes.count - offset >= n else {
@@ -78,5 +79,13 @@ public struct WireReader {
         }
         let start = try take(length)
         return String(decoding: bytes[start..<(start + length)], as: UTF8.self)
+    }
+    
+    public mutating func readBytes(_ count: Int) throws -> [UInt8] {
+        guard count >= 0 else {
+            throw RemoteComposeError.invalidLength(offset: offset, length: count)
+        }
+        let start = try take(count)
+        return Array(bytes[start..<(start + count)])
     }
 }

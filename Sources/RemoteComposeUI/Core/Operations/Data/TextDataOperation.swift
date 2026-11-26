@@ -15,7 +15,7 @@ extension TextDataOperation {
         let text = try r.readUTF8()
         return .textData(TextDataOperation(textId: id, text: text))
     }
-
+    
     public func write(to w: inout WireWriter) {
         w.start(OpCode.dataText)
         w.writeInt(textId)

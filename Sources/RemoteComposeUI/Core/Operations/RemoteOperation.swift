@@ -4,6 +4,13 @@ public enum RemoteOperation: Equatable {
     case header(HeaderOperation)
     case textData(TextDataOperation)
     case dataListIds(DataListIdsOperation)
+    case floatExpression(FloatExpressionOperation)
+    case componentValue(ComponentValueOperation)
+    case textFromFloat(TextFromFloatOperation)
+    case textMerge(TextMergeOperation)
+    case textLookup(TextLookupOperation)
+    case paintData(PaintDataOperation)
+    case drawTextAnchored(DrawTextAnchoredOperation)
     case rootLayout(RootLayoutOperation)
     case layoutContent(LayoutContentOperation)
     case rowLayout(RowLayoutOperation)
@@ -20,6 +27,13 @@ public enum RemoteOperation: Equatable {
         case .header: return OpCode.header
         case .textData: return OpCode.dataText
         case .dataListIds: return OpCode.dataListIds
+        case .floatExpression: return OpCode.floatExpression
+        case .componentValue: return OpCode.componentValue
+        case .textFromFloat: return OpCode.textFromFloat
+        case .textMerge: return OpCode.textMerge
+        case .textLookup: return OpCode.textLookup
+        case .paintData: return OpCode.paintData
+        case .drawTextAnchored: return OpCode.drawTextAnchored
         case .rootLayout: return OpCode.layoutRoot
         case .layoutContent: return OpCode.layoutContent
         case .rowLayout: return OpCode.layoutRow

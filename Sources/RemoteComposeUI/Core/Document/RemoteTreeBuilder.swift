@@ -29,7 +29,16 @@ enum RemoteTreeBuilder {
                 if !stack.isEmpty { stack[stack.count - 1].modifiers.append(.width(m)) }
             case .heightModifier(let m):
                 if !stack.isEmpty { stack[stack.count - 1].modifiers.append(.height(m)) }
-            case .header, .textData, .dataListIds:
+            case .paintData(let paint):
+                if let canvasIndex = stack.lastIndex(where: { if case .canvas = $0.kind { return true }; return false }) {
+                    stack[canvasIndex].canvasCommands.append(.paint(paint))
+                }
+            case .drawTextAnchored(let draw):
+                if let canvasIndex = stack.lastIndex(where: { if case .canvas = $0.kind { return true }; return false }) {
+                    stack[canvasIndex].canvasCommands.append(.drawTextAnchored(draw))
+                }
+            case .header, .textData, .dataListIds, .floatExpression, .componentValue,
+                    .textFromFloat, .textMerge, .textLookup:
                 break
             }
         }

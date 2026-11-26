@@ -11,6 +11,7 @@ public enum DimensionModifierType: Int, Equatable, CaseIterable {
     case fillParentMaxWidth = 7
     case fillParentMaxHeight = 8
     
+    
     public init(wireValue: Int) {
         self = DimensionModifierType(rawValue: wireValue) ?? .exact
     }

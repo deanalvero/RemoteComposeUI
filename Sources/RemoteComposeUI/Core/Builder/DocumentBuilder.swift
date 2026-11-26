@@ -4,6 +4,7 @@ public final class DocumentBuilder {
     private var out = WireWriter()
     private var texts: [(id: Int, text: String)] = []
     private var idLists: [DataListIdsOperation] = []
+    private var preludeOperations: [RemoteOperation] = []
     private var nextTextId = 1
     private var nextComponentId = 1
     private let width: Int
@@ -114,6 +115,73 @@ public final class DocumentBuilder {
         idLists.append(DataListIdsOperation(id: id, ids: values))
     }
     
+    public func floatExpression(id: Int, expression: [RemoteFloat], animationSpec: [RemoteFloat]? = nil) {
+        preludeOperations.append(.floatExpression(
+            FloatExpressionOperation(id: id, expression: expression, animationSpec: animationSpec)
+        ))
+    }
+    
+    public func componentValue(type: Int, componentId: Int, valueId: Int) {
+        preludeOperations.append(.componentValue(
+            ComponentValueOperation(type: type, componentId: componentId, valueId: valueId)
+        ))
+    }
+    
+    public func textFromFloat(
+        textId: Int,
+        value: RemoteFloat,
+        digitsBefore: Int = 0,
+        digitsAfter: Int = 2,
+        flags: Int = 0
+    ) {
+        preludeOperations.append(.textFromFloat(TextFromFloatOperation(
+            textId: textId, value: value, digitsBefore: digitsBefore, digitsAfter: digitsAfter, flags: flags
+        )))
+    }
+    
+    public func textMerge(textId: Int, sourceId1: Int, sourceId2: Int) {
+        preludeOperations.append(.textMerge(
+            TextMergeOperation(textId: textId, sourceId1: sourceId1, sourceId2: sourceId2)
+        ))
+    }
+    
+    public func textLookup(textId: Int, dataSetId: Int, index: RemoteFloat) {
+        preludeOperations.append(.textLookup(
+            TextLookupOperation(textId: textId, dataSetId: dataSetId, index: index)
+        ))
+    }
+    
+    public func paintData(_ paintBundle: [Int]) {
+        PaintDataOperation(paintBundle: paintBundle).write(to: &out)
+    }
+    
+    public func drawTextAnchored(
+        textId: Int,
+        x: RemoteFloat,
+        y: RemoteFloat,
+        panX: RemoteFloat = RemoteFloat(0),
+        panY: RemoteFloat = RemoteFloat(0),
+        flags: Int = 0
+    ) {
+        DrawTextAnchoredOperation(
+            textId: textId, x: x, y: y, panX: panX, panY: panY, flags: flags
+        ).write(to: &out)
+    }
+    
+    @discardableResult
+    public func drawTextAnchored(
+        _ string: String,
+        x: RemoteFloat,
+        y: RemoteFloat,
+        panX: RemoteFloat = RemoteFloat(0),
+        panY: RemoteFloat = RemoteFloat(0),
+        flags: Int = 0
+    ) -> Int {
+        let textId = registerText(string)
+        drawTextAnchored(textId: textId, x: x, y: y, panX: panX, panY: panY, flags: flags)
+        return textId
+    }
+    
     // MARK: Output
     
     public func build() -> Data {
@@ -124,6 +192,9 @@ public final class DocumentBuilder {
         }
         for list in idLists {
             list.write(to: &w)
+        }
+        for operation in preludeOperations {
+            write(operation, to: &w)
         }
         let header = w.bytes
         return Data(header + out.bytes)
@@ -141,6 +212,17 @@ public final class DocumentBuilder {
         nextTextId += 1
         texts.append((id: id, text: string))
         return id
+    }
+    
+    private func write(_ operation: RemoteOperation, to writer: inout WireWriter) {
+        switch operation {
+        case .floatExpression(let value): value.write(to: &writer)
+        case .componentValue(let value): value.write(to: &writer)
+        case .textFromFloat(let value): value.write(to: &writer)
+        case .textMerge(let value): value.write(to: &writer)
+        case .textLookup(let value): value.write(to: &writer)
+        default: break
+        }
     }
     
     private func write(_ modifiers: [RemoteModifier]) {

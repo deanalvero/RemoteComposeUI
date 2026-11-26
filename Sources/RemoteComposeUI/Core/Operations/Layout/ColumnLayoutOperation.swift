@@ -39,7 +39,7 @@ extension ColumnLayoutOperation {
             )
         )
     }
-
+    
     public func write(to w: inout WireWriter) {
         w.start(OpCode.layoutColumn)
         w.writeInt(componentId)

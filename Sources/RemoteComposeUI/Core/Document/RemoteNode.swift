@@ -6,6 +6,11 @@ public enum RemoteModifier: Equatable {
     case height(HeightModifierOperation)
 }
 
+public enum RemoteCanvasCommand: Equatable {
+    case paint(PaintDataOperation)
+    case drawTextAnchored(DrawTextAnchoredOperation)
+}
+
 public struct RemoteNode: Identifiable, Equatable {
     public enum Kind: Equatable {
         case root(RootLayoutOperation)
@@ -20,11 +25,19 @@ public struct RemoteNode: Identifiable, Equatable {
     public var kind: Kind
     public var modifiers: [RemoteModifier]
     public var children: [RemoteNode]
+    public var canvasCommands: [RemoteCanvasCommand]
     
-    public init(id: Int, kind: Kind, modifiers: [RemoteModifier] = [], children: [RemoteNode] = []) {
+    public init(
+        id: Int,
+        kind: Kind,
+        modifiers: [RemoteModifier] = [],
+        children: [RemoteNode] = [],
+        canvasCommands: [RemoteCanvasCommand] = []
+    ) {
         self.id = id
         self.kind = kind
         self.modifiers = modifiers
         self.children = children
+        self.canvasCommands = canvasCommands
     }
 }
