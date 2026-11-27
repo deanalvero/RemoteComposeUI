@@ -35,7 +35,8 @@ public struct RemoteDocument {
         timeSnapshot: RemoteTimeSnapshot? = nil,
         animationTime: Float? = nil,
         animationDeltaTime: Float? = nil,
-        apiLevel: Float? = nil
+        apiLevel: Float? = nil,
+        componentMetrics: [Int: RemoteComponentMetrics] = [:]
     ) -> RemoteVariables {
         var result = RemoteVariables(
             floats: overrides?.floats ?? [:],
@@ -63,6 +64,27 @@ public struct RemoteDocument {
             result.floats[RemoteContextVariableID.animationDeltaTime] = animationDeltaTime
         }
         
+        for componentValue in componentValues {
+            guard let metrics = componentMetrics[componentValue.componentId] else {
+                continue
+            }
+
+            let value: Float
+            switch componentValue.type {
+            case ComponentValueOperation.width:
+                value = metrics.width
+            case ComponentValueOperation.height:
+                value = metrics.height
+            default:
+                continue
+            }
+
+            guard value.isFinite else {
+                continue
+            }
+            result.floats[componentValue.valueId] = value
+        }
+
         for operation in operations {
             switch operation {
             case .floatExpression(let expression):

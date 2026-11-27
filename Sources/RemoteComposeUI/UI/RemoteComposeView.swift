@@ -7,6 +7,7 @@ public struct RemoteComposeView: View {
     private let refreshInterval: TimeInterval?
     private let usesContinuousSchedule: Bool
     @State private var runtime: RemoteRuntime
+    @State private var componentMetrics: [Int: RemoteComponentMetrics] = [:]
     
     public init(
         document: RemoteDocument,
@@ -63,9 +64,18 @@ public struct RemoteComposeView: View {
     
     @ViewBuilder
     private var renderedContent: some View {
-        let frame = runtime.makeFrame(for: document, overriding: variables)
+        let frame = runtime.makeFrame(
+            for: document,
+            overriding: variables,
+            componentMetrics: componentMetrics
+        )
         if let root = document.root {
             RemoteNodeView(node: root, context: RenderContext(variables: frame.variables))
+                .onPreferenceChange(ComponentMetricsPreferenceKey.self) { measurements in
+                    if measurements != componentMetrics {
+                        componentMetrics = measurements
+                    }
+                }
         } else {
             EmptyView()
         }

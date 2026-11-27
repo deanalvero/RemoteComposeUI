@@ -7,6 +7,19 @@ struct RemoteNodeView: View {
     
     var body: some View {
         decorated(AnyView(content))
+            .background {
+                GeometryReader { geometry in
+                    Color.clear.preference(
+                        key: ComponentMetricsPreferenceKey.self,
+                        value: [
+                            node.componentId: RemoteComponentMetrics(
+                                width: Float(geometry.size.width),
+                                height: Float(geometry.size.height)
+                            )
+                        ]
+                    )
+                }
+            }
     }
     
     @ViewBuilder

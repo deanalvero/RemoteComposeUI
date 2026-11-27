@@ -27,6 +27,17 @@ public struct RemoteNode: Identifiable, Equatable {
     public var children: [RemoteNode]
     public var canvasCommands: [RemoteCanvasCommand]
     
+    public var componentId: Int {
+        switch kind {
+        case .root(let operation): return operation.componentId
+        case .content(let operation): return operation.componentId
+        case .row(let operation): return operation.componentId
+        case .column(let operation): return operation.componentId
+        case .canvas(let operation): return operation.componentId
+        case .text(let operation): return operation.componentId
+        }
+    }
+
     public init(
         id: Int,
         kind: Kind,

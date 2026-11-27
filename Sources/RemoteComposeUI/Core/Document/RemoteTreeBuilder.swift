@@ -55,15 +55,23 @@ enum RemoteTreeBuilder {
                 id: -1, kind: .root(RootLayoutOperation(componentId: -1)),
                 children: topLevel)
         }
-        return flattenContent(root)
+        let componentIDs = Set(operations.compactMap { operation -> Int? in
+            guard case .componentValue(let value) = operation else { return nil }
+            return value.componentId
+        })
+        return flattenContent(root, preserving: componentIDs)
     }
     
-    private static func flattenContent(_ node: RemoteNode) -> RemoteNode {
+    private static func flattenContent(
+        _ node: RemoteNode,
+        preserving componentIDs: Set<Int>
+    ) -> RemoteNode {
         var result = node
         result.children = []
         for child in node.children {
-            let flattened = flattenContent(child)
-            if case .content = flattened.kind {
+            let flattened = flattenContent(child, preserving: componentIDs)
+            if case .content(let operation) = flattened.kind,
+               !componentIDs.contains(operation.componentId) {
                 result.children.append(contentsOf: flattened.children)
             } else {
                 result.children.append(flattened)

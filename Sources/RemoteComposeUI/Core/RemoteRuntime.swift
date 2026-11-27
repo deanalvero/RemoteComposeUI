@@ -60,7 +60,8 @@ public final class RemoteRuntime {
     
     public func makeFrame(
         for document: RemoteDocument,
-        overriding overrides: RemoteVariables? = nil
+        overriding overrides: RemoteVariables? = nil,
+        componentMetrics: [Int: RemoteComponentMetrics] = [:]
     ) -> RemoteRuntimeFrame {
         let wallClockMillis = clock.millis()
         
@@ -81,7 +82,8 @@ public final class RemoteRuntime {
             timeSnapshot: snapshot,
             animationTime: animationTime,
             animationDeltaTime: animationDeltaTime,
-            apiLevel: apiLevel
+            apiLevel: apiLevel,
+            componentMetrics: componentMetrics
         )
         
         return RemoteRuntimeFrame(
